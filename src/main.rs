@@ -1,5 +1,6 @@
 #![feature(async_closure)]
 
+use std::collections::HashSet;
 use std::env;
 use std::error;
 use std::fs;
@@ -14,7 +15,7 @@ use tokio;
 
 mod api;
 
-// Empirically selected value. 
+// Empirically selected value.
 // Further increase in the number of threads does not speed up the download (in the case of my iPhone 11)
 const N_WORKERS: usize = 4;
 
@@ -44,7 +45,24 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
     let all_books = client.fetch_inbox().await.context("fetching book list")?;
     info!("got {:?} books", all_books.len());
 
-    let to_download = all_books.iter().map(|book| {
+    let local_files = fs::read_dir(&dst_dir)?
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.file_name().into_string().ok())
+        .flatten();
+    let local_file_filter = HashSet::<String>::from_iter(local_files);
+
+    let not_present_books: Vec<_> = all_books
+        .iter()
+        .filter(|book| !local_file_filter.contains(&book.name))
+        .collect();
+
+    info!(
+        "{} out of {} books are already here",
+        all_books.len() - not_present_books.len(),
+        all_books.len()
+    );
+    info!("fetching {} books", not_present_books.len());
+    let to_download = not_present_books.iter().map(|book| {
         info!("fetching {}", &book.name);
         client
             .fetch_book(&book.path)
@@ -66,7 +84,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         let filename = Path::new(&dst_dir).join(&book.name);
         info!("writing {:?}", &filename);
         fs::write(&filename, content).context(format!("writing {:?}", &filename))?;
-        info!("got {}/{} books", i + 1, all_books.len());
+        info!("got {}/{} books", i + 1, not_present_books.len());
     }
     Ok(())
 }
