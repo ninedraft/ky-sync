@@ -9,7 +9,7 @@ const DEFAULT_FETCH_TIMEOUT: Duration = Duration::from_secs(16 * 60);
 
 pub type Books = Vec<Book>;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Book {
     #[serde(rename = "path")]
     pub path: String,
@@ -45,6 +45,7 @@ impl Config {
     }
 }
 
+#[derive(Clone)]
 pub struct Client {
     config: Config,
     client: reqwest::Client,
