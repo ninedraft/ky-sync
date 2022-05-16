@@ -14,7 +14,9 @@ use tokio;
 
 mod api;
 
-const N_WORKERS: usize = 2;
+// Empirically selected value. 
+// Further increase in the number of threads does not speed up the download (in the case of my iPhone 11)
+const N_WORKERS: usize = 4;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn error::Error>> {
