@@ -8,7 +8,7 @@ license-file = "LICENSE"
 readme = "README.md"
 repository = "https://github.com/ninedraf/ky-sync"
 homepage = "https://github.com/ninedraf/ky-sync"
-keywords = ["cli", "async", "exec", "ky-book", "media", "e-books", "books"]
+keywords = ["cli", "async", "exec", "media", "books"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
